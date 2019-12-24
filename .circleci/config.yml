@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/ruby:2.4.1-node-browsers
+      - image: circleci/ruby:2.6.3
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -18,6 +18,9 @@ jobs:
 
     steps:
       - checkout
+      - run: # circleciのrubyのコンテナのbundlerのバージョンは古いのでupdateする
+        name: bundle update
+        command: gem install bundler:2.0.2
 
       # Download and cache dependencies
       - restore_cache:
