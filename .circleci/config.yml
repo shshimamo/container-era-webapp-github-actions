@@ -67,6 +67,30 @@ jobs:
           command: |
             docker push ${ECR_DOMAIN}:$CIRCLE_SHA1
             docker push ${ECR_DOMAIN}:latest
+  deploy:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - run:
+          name: install aws cli
+          command: |
+            sudo pip install awscli
+      - run:
+          name: download jq
+          command: |
+            wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+            mv jq-linux64 jq
+      - run:
+          name: login
+          command: |
+            $(aws ecr get-login --no-include-email --region ap-northeast-1)
+      - run:
+          name: deploy
+          command: |
+            aws ecs describe-task-definition --task-definition container-era-service | jq '.taskDefinition | { containerDefinitions: .containerDefinitions, family: .family, taskRoleArn: .taskRoleArn, networkMode: .networkMode, volumes: .volumes, placementConstraints: .placementConstraints }' > definition.json
+            aws ecs register-task-definition --family container-era-service --cli-input-json file://definition.json
+            aws ecs update-service --cluster container-era-ecs-cluster --service container-era-service --task-definition container-era-service
+
 workflows:
   version: 2
   test:
@@ -75,6 +99,12 @@ workflows:
       - build_image:
           requires:
             - build
+          filters:
+            branches:
+              only: master
+      - deploy:
+          requires:
+            - build_image
           filters:
             branches:
               only: master
