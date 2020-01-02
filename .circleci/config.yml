@@ -87,9 +87,13 @@ jobs:
       - run:
           name: deploy
           command: |
-            aws ecs describe-task-definition --task-definition container-era-service | jq '.taskDefinition | { containerDefinitions: .containerDefinitions, family: .family, taskRoleArn: .taskRoleArn, networkMode: .networkMode, volumes: .volumes, placementConstraints: .placementConstraints }' > definition.json
-            aws ecs register-task-definition --family container-era-service --cli-input-json file://definition.json
+            aws ecs describe-task-definition --task-definition container-era-service | jq '.taskDefinition | { containerDefinitions: .containerDefinitions, family: .family, executionRoleArn: .executionRoleArn, networkMode: .networkMode, volumes: .volumes, placementConstraints: .placementConstraints }' > definition.json
+            aws ecs register-task-definition --execution-role-arn arn:aws:iam::543795826793:role/ecs-task-role --family container-era-service --cli-input-json file://definition.json
             aws ecs update-service --cluster container-era-ecs-cluster --service container-era-service --task-definition container-era-service
+      - run:
+          name: migration
+          command: |
+            aws ecs run-task --cluster container-era-ecs-cluster --task-definition container-era-migration
 
 workflows:
   version: 2
