@@ -7,12 +7,19 @@ services:
       - .:/app:cached
     ports:
       - "4567:4567"
+    links:
+      - db
     depends_on:
       - db
     entrypoint: bash -c
+    environment:
+      RACK_ENV: production
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: ""
     command: |
       "bundle install && \
-       bundle exec ruby app.rb -o 0.0.0.0"
+      bundle exec ruby app.rb -o 0.0.0.0"
   db:
     image: mysql:5.7
     environment:

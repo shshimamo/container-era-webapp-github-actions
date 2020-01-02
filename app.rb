@@ -1,4 +1,5 @@
-require "sinatra"
+require 'sinatra'
+require './models/post'
 
 get "/" do
   "Hello world!"
