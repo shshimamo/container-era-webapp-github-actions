@@ -1,6 +1,7 @@
 require 'sinatra'
 require './models/post'
 
+# root path
 get '/' do
   @posts = Post.all
   erb :index
